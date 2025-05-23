@@ -33,7 +33,7 @@ Task 2.2: Create a task to extract data from csv file
 
 Task 2.3: Create a task to extract data from tsv file
 
-Task 2.4: Create a task to extract data from fixed width file
+Task 2.4: Create a task to extract data from fixed-width file
 
 Task 2.5: Create a task to consolidate data extracted from previous tasks
 
@@ -50,3 +50,7 @@ Task 3.2: Unpause and trigger the DAG
 Task 3.3: List the DAG tasks
 
 Task 3.4: Monitor the DAG
+
+
+#### Note about screenshots
+Throughout this project, I took screenshots of each task and named them accordingly.
