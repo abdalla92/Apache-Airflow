@@ -1,0 +1,17 @@
+
+## Set up the project environment
+
+1. Install and Start Apache Airflow.
+    pip install apache-airflow
+
+2. Open a terminal and create a directory structure for the staging area as follows: 
+    /home/project/airflow/dags/finalassignment/staging.
+
+  sudo mkdir -p /home/project/airflow/dags/finalassignment/staging
+
+3. Execute the following commands to give appropriate permission to the directories.
+    sudo chmod -R 777 /home/project/airflow/dags/finalassignment
+
+4. Download the data set from the source to the following destination using the curl command.
+    sudo curl https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DB0250EN-SkillsNetwork/labs/Final%20Assignment/tolldata.tgz -o /home/project/airflow/dags/finalassignment/tolldata.tgz
+
