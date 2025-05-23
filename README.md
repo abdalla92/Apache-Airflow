@@ -4,6 +4,7 @@ This project is to build ETL Data Pipelines by extracting, transforming, and loa
 ## Scenario
 I am a data engineer at a data analytics consulting company. I have been assigned a project to decongest the national highways by analyzing the road traffic data from different toll plazas. Each highway is operated by a different toll operator with a different IT setup that uses different file formats. my job is to collect data available in different formats and consolidate it into a single file.
 
+## Objectives
 In this project, I will develop an Apache Airflow DAG that will:
 
 Extract data from a csv file
