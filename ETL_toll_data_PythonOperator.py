@@ -14,9 +14,9 @@ import tarfile
 
 #defining DAG arguments
 default_args = {
-    'owner': 'Abdallah',
+    'owner': 'myname',
     'start_date': days_ago(0),
-    'email': ['cabdalla@gmail.com'],
+    'email': ['myemail@gmail.com'],
     'email_on_failure': True,
     'email_on_retry': True,
     'retries': 1,
