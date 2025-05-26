@@ -4,6 +4,7 @@ from datetime import timedelta
 from airflow.models import DAG
 # Operators; you need this to write tasks!
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash_operator import BashOperator
 # This makes scheduling easy
 from airflow.utils.dates import days_ago
 import requests
@@ -14,7 +15,7 @@ import tarfile
 
 #defining DAG arguments
 default_args = {
-    'owner': 'myname',
+    'owner': 'Abdallah',
     'start_date': days_ago(0),
     'email': ['myemail@gmail.com'],
     'email_on_failure': True,
@@ -53,7 +54,7 @@ def download_file():
 
 def download_dataset_py():
     url = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DB0250EN-SkillsNetwork/labs/Final%20Assignment/tolldata.tgz'
-    output_path = '/home/project/airflow/dags/python_etl/staging/tolldata.tgz'
+    output_path = '/home/project/airflow/dags/finalassignment/staging/tolldata.tgz'
     
     # Check if the file already exists
     if os.path.exists(output_path):
@@ -69,7 +70,7 @@ def untar_dataset_py():
     # Path to the tar file
     tar_path = input_file
     # Destination directory
-    extract_path = '/home/project/airflow/dags/python_etl/staging/'
+    extract_path = '/home/project/airflow/dags/finalassignment/staging/'
     
     # Open the tar file
     with tarfile.open(tar_path, 'r:gz') as tar:
@@ -80,8 +81,8 @@ def untar_dataset_py():
 
 def extract_data_from_csv():
     # Read the contents of the file into a string
-    with open('vehicle-data.csv', 'r') as infile, \
-            open(csv_data, 'w') as outfile:
+    with open('/home/project/airflow/dags/finalassignment/staging/vehicle-data.csv', 'r') as infile, \
+            open('/home/project/airflow/dags/finalassignment/staging/'+csv_data, 'w') as outfile:
         for line in infile:
             fields = line.split(',')
             field_1 = fields[0]
@@ -92,8 +93,8 @@ def extract_data_from_csv():
 
 def extract_data_from_tsv():
     # Read the contents of the file into a string
-    with open('tollplaza-data.tsv', 'r') as infile, \
-            open(tsv_data, 'w') as outfile:
+    with open('/home/project/airflow/dags/finalassignment/staging/tollplaza-data.tsv', 'r') as infile, \
+            open('/home/project/airflow/dags/finalassignment/staging/'+tsv_data, 'w') as outfile:
         for line in infile:
             fields = line.split('\t')
             field_5 = fields[4]
@@ -103,37 +104,42 @@ def extract_data_from_tsv():
 
 def extract_data_from_fixed_width():
     # Read the contents of the file into a string
-    with open('payment-data.txt', 'r') as infile, \
-            open(fixed_width_data, 'w') as outfile:
+    with open('/home/project/airflow/dags/finalassignment/staging/payment-data.txt', 'r') as infile, \
+            open('/home/project/airflow/dags/finalassignment/staging/'+ fixed_width_data, 'w') as outfile:
         for line in infile:
-            # Extract the last two columns based on fixed-width positions
-            field_6 = line[-9:-4].strip()  # Adjust positions as per the file structure
-            field_7 = line[-3:].strip()
+            # Split by whitespace to get columns
+            fields = line.strip().split()
+            # Extract the last two columns
+            field_6 = fields[-2]
+            field_7 = fields[-1]
             outfile.write(field_6 + "," + field_7 + "\n")
-
 def consolidate_data():
-    # Open the output file in write mode
-    with open(extracted_data, 'w') as outfile:
-        # Read and write data from csv_data.csv
-        with open(csv_data, 'r') as csvfile:
-            for line in csvfile:
-                outfile.write(line)
-        
-        # Read and write data from tsv_data.csv
-        with open(tsv_data, 'r') as tsvfile:
-            for line in tsvfile:
-                outfile.write(line)
-        
-        # Read and write data from fixed_width_data.csv
-        with open(fixed_width_data, 'r') as fixedfile:
-            for line in fixedfile:
-                outfile.write(line)
-    print(f"Data consolidated successfully into: {extracted_data}")
+    # Paths to the input files
+    csv_path = '/home/project/airflow/dags/finalassignment/staging/' + csv_data
+    tsv_path = '/home/project/airflow/dags/finalassignment/staging/' + tsv_data
+    fixed_path = '/home/project/airflow/dags/finalassignment/staging/' + fixed_width_data
+    output_path = '/home/project/airflow/dags/finalassignment/staging/' + extracted_data
+
+    # Open all files simultaneously
+    with open(csv_path, 'r') as csvfile, \
+         open(tsv_path, 'r') as tsvfile, \
+         open(fixed_path, 'r') as fixedfile, \
+         open(output_path, 'w') as outfile:
+        # Iterate through all files line by line
+        for csv_line, tsv_line, fixed_line in zip(csvfile, tsvfile, fixedfile):
+            # Remove trailing newlines and spaces
+            csv_line = csv_line.strip()
+            tsv_line = tsv_line.strip()
+            fixed_line = fixed_line.strip()
+            # Concatenate with commas (like paste -d,)
+            combined_line = f"{csv_line} {tsv_line} {fixed_line}\n"
+            outfile.write(combined_line)
+    print(f"Data consolidated successfully into: {outfile}")
 
 def transform_data():
     # Read the contents of the file into a string
-    with open(extracted_data, 'r') as infile, \
-        open(transformed_data, 'w') as outfile:
+    with open('/home/project/airflow/dags/finalassignment/staging/' + extracted_data, 'r') as infile, \
+        open('/home/project/airflow/dags/finalassignment/staging/' + transformed_data, 'w') as outfile:
         for line in infile:
             transformed_line = line.upper()
             outfile.write(transformed_line + '\n')
@@ -142,21 +148,21 @@ def check():
     global output_file
     print("Inside Check")
     # Save the array to a CSV file
-    with open(transformed_data, 'r') as infile:
+    with open('/home/project/airflow/dags/finalassignment/staging/' + transformed_data, 'r') as infile:
         for line in infile:
             print(line)
 
 
 # Define the task named execute_download_dataset to call the `download_dataset` function
-execute_download_dataset = PythonOperator(
+execute_download_dataset = BashOperator(
     task_id='download_dataset',
-    bash_command='curl -o /home/project/airflow/dags/python_etl/staging/tolldata.tgz https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DB0250EN-SkillsNetwork/labs/Final%20Assignment/tolldata.tgz',
+    bash_command='curl -o /home/project/airflow/dags/finalassignment/staging/tolldata.tgz https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DB0250EN-SkillsNetwork/labs/Final%20Assignment/tolldata.tgz',
     dag=dag,
 )
 # Define the task named execute_untar_dataset to call the `untar_dataset_py` function
-execute_untar_dataset = PythonOperator(
+execute_untar_dataset = BashOperator(
     task_id='untar_dataset',
-    bash_command='tar -xvf /home/project/airflow/dags/python_etl/staging/$input_file -C /home/project/airflow/dags/python_etl/staging/',
+    bash_command='tar -xzf /home/project/airflow/dags/finalassignment/staging/tolldata.tgz --directory=/home/project/airflow/dags/finalassignment/staging/',
     dag=dag,
 )
 # Define the task named execute_extract_data_from_csv to call the `extract_data_from_csv` function
@@ -198,5 +204,5 @@ execute_check = PythonOperator(
 )
 
 # Set the task dependencies
-execute_download_dataset >> execute_untar_dataset >> execute_extract_data_from_csv, execute_extract_data_from_tsv, \
+execute_download_dataset >> execute_untar_dataset >> execute_extract_data_from_csv >> execute_extract_data_from_tsv >> \
     execute_extract_data_from_fixed_width >> execute_consolidate_data >> execute_transform_data >> execute_check
